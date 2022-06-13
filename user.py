@@ -1,5 +1,5 @@
 from pydantic import BaseModel, HttpUrl
-from typing import Sequence
+from typing import List
 
 
 class User(BaseModel):
@@ -7,3 +7,7 @@ class User(BaseModel):
     firstName: str
     lastName: str
     password: str
+
+
+class UserList(BaseModel):
+    users: List[User]
