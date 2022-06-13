@@ -1,22 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, APIRouter
 
-app = FastAPI()
-
-items = {"foo": "The Foo Wrestlers"}
+app = FastAPI(openapi_url="/openapi.json")
+api_router = APIRouter()
 
 
 @app.get("/", status_code=200)
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Hello User"}
 
 
-@app.post("/items/", status_code=201)
-async def create_item(name: str):
-    return {"name": name}
-
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: str):
-    if item_id not in items:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return {"item": items[item_id]}
+app.include_router(api_router)
