@@ -7,7 +7,3 @@ class User(BaseModel):
     firstName: str
     lastName: str
     password: str
-
-
-class UserList(BaseModel):
-    users: List[User]

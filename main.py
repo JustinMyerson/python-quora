@@ -24,15 +24,14 @@ def fetch_recipe(*, user_email: str):
 
 @api_router.post("/auth/register/", status_code=201, response_model=User)
 def register_user(*, userCreated: User) -> dict:
-    new_user_id = len(USERS + 1)
     user_entry = User(
-        id=new_user_id,
         email=userCreated.email,
         firstName=userCreated.firstName,
         lastName=userCreated.lastName,
         password=userCreated.password,
     )
     USERS.append(user_entry.dict())
+    print(USERS)
 
     return user_entry
 
