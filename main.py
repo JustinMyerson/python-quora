@@ -5,6 +5,7 @@ from connect_db import connect
 from fastapi import FastAPI, APIRouter, HTTPException
 
 import bcrypt
+import re
 
 from user import User
 from user_data import USERS
@@ -35,15 +36,28 @@ def hash_password(password: str):
     hash = bcrypt.hashpw(bytePwd, mySalt)
 
 
+regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+
+def check_email_valid(email):
+    if(re.fullmatch(regex, email)):
+        return True
+    else:
+        return False
+
+
 @api_router.post("/auth/register/", status_code=201, response_model=User)
 def register_user(*, userCreated: User) -> dict:
-    user_entry = User(
-        email=userCreated.email,
-        firstName=userCreated.firstName,
-        lastName=userCreated.lastName,
-        # Ensure that the password is stored in a hashed format
-        password=hash_password(userCreated.password),
-    )
+    email = ""
+    if check_email_valid(userCreated.email):
+        email = userCreated.email
+        user_entry = User(
+            email=email,
+            firstName=userCreated.firstName,
+            lastName=userCreated.lastName,
+            # Ensure that the password is stored in a hashed format
+            password=hash_password(userCreated.password),
+        )
     USERS.append(user_entry.dict())
     print(USERS)
 
