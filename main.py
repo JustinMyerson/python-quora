@@ -1,3 +1,4 @@
+from encodings import utf_8
 import psycopg2
 
 from config import config
@@ -5,6 +6,7 @@ from fastapi import FastAPI, APIRouter, HTTPException
 
 import bcrypt
 import re
+import jwt
 
 from user import User
 from user_data import USERS
@@ -14,54 +16,20 @@ api_router = APIRouter()
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
-try:
-    # read connection parameters
-    params = config()
-
-    # connect to the PostgreSQL server
-    print('Connecting to the PostgreSQL database...')
-    conn = psycopg2.connect(**params)
-
-    # create a cursor
-    cur = conn.cursor()
-
-    # execute a statement
-    print('PostgreSQL database version:')
-    cur.execute('SELECT version()')
-
-    # display the PostgreSQL database server version
-    db_version = cur.fetchone()
-    print(db_version)
-
-    # close the communication with the PostgreSQL
-    cur.close()
-except (Exception, psycopg2.DatabaseError) as error:
-    print(error)
-    print("ERROR")
-finally:
-    if conn is not None:
-        conn.close()
-        print('Database connection closed.')
-
 
 @app.get("/", status_code=200)
 def root():
     return {"message": "Hello User"}
 
 
-# @api_router.get("/user/{user_email}", status_code=200, response_model=User)
-# def fetch_recipe(*, user_email: str):
-#     result = [user for user in USERS if user["email"] == user_email]
-#     if not result:
-#         raise HTTPException(
-#             status_code=404, detail=f"User with email: {user_email} not found"
-#         )
-#     return result[0]
-
-def hash_password(password: str):
+def hash_password(password):
     bytePwd = password.encode('utf-8')
     hashed_pw = bcrypt.hashpw(bytePwd, bcrypt.gensalt())
     return hashed_pw
+
+
+def validate_user_password(actual_password_hashed, provided_password: str):
+    return bcrypt.checkpw(provided_password.encode('utf-8'), actual_password_hashed)
 
 
 def check_email_valid(email):
@@ -75,6 +43,7 @@ def check_email_valid(email):
 def add_user_to_db(email, firstName, lastName, password):
     if check_email_valid(email):
         if (len(password) >= 8):
+            params = config()
             conn = psycopg2.connect(**params)
             # create a cursor
             cur = conn.cursor()
@@ -85,10 +54,36 @@ def add_user_to_db(email, firstName, lastName, password):
             print("Records created successfully")
             cur.close()
             conn.close()
+            encoded = jwt.encode({"email": email}, "secret", algorithm="HS256")
+            print(jwt.decode(encoded, "secret", algorithms=["HS256"]))
+
+
+@api_router.post("/auth/login/", status_code=200, response_model=User)
+def login_user(email, password):
+    user_password = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    # create a cursor
+    cur = conn.cursor()
+    try:
+        email = "'{}'".format(email)
+        query = "SELECT password FROM users WHERE email = {}".format(
+            email)
+        cur.execute(query)
+        result = cur.fetchall()
+        for row in result:
+            user_password = row[0]
+    except:
+        print("Error, user with email {} not found".format(email))
+
+    print(user_password.encode('utf-8'))
+    print(hash_password(password))
+
+    validate_user_password(bytes(user_password), password)
 
 
 app.include_router(api_router)
 
 if __name__ == '__main__':
-    add_user_to_db('test@gmail.com', 'John', 'Doe', 'Absbsbsbsbsbs')
-    print(len(hash_password("Absbsbsbsbsbs")))
+    # add_user_to_db('test@gmail.com', 'John', 'Doe', 'password')
+    login_user("test@gmail.com", 'password')
