@@ -1,6 +1,10 @@
 import psycopg2
+
 from config import config
+from connect_db import connect
 from fastapi import FastAPI, APIRouter, HTTPException
+
+import bcrypt
 
 from user import User
 from user_data import USERS
@@ -23,52 +27,27 @@ api_router = APIRouter()
 #         )
 #     return result[0]
 
-
-# @api_router.post("/auth/register/", status_code=201, response_model=User)
-# def register_user(*, userCreated: User) -> dict:
-#     user_entry = User(
-#         email=userCreated.email,
-#         firstName=userCreated.firstName,
-#         lastName=userCreated.lastName,
-#         password=userCreated.password,
-#     )
-#     USERS.append(user_entry.dict())
-#     print(USERS)
-
-#     return user_entry
+def hash_password(password: str):
+    bytePwd = password.encode('utf-8')
+    # Generate salt
+    mySalt = bcrypt.gensalt()
+    # Hash password
+    hash = bcrypt.hashpw(bytePwd, mySalt)
 
 
-def connect():
-    """ Connect to the PostgreSQL database server """
-    conn = None
-    try:
-        # read connection parameters
-        params = config()
+@api_router.post("/auth/register/", status_code=201, response_model=User)
+def register_user(*, userCreated: User) -> dict:
+    user_entry = User(
+        email=userCreated.email,
+        firstName=userCreated.firstName,
+        lastName=userCreated.lastName,
+        # Ensure that the password is stored in a hashed format
+        password=hash_password(userCreated.password),
+    )
+    USERS.append(user_entry.dict())
+    print(USERS)
 
-        # connect to the PostgreSQL server
-        print('Connecting to the PostgreSQL database...')
-        conn = psycopg2.connect(**params)
-
-        # create a cursor
-        cur = conn.cursor()
-
-        # execute a statement
-        print('PostgreSQL database version:')
-        cur.execute('SELECT version()')
-
-        # display the PostgreSQL database server version
-        db_version = cur.fetchone()
-        print(db_version)
-
-        # close the communication with the PostgreSQL
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-        print("ERROR")
-    finally:
-        if conn is not None:
-            conn.close()
-            print('Database connection closed.')
+    return user_entry
 
 
 app.include_router(api_router)
