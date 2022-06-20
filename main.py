@@ -17,15 +17,10 @@ api_router = APIRouter()
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
 
-@app.get("/", status_code=200)
-def root():
-    return {"message": "Hello User"}
-
-
 def hash_password(password):
-    bytePwd = password.encode('utf-8')
+    bytePwd = bytes(password, encoding='utf-8')
     hashed_pw = bcrypt.hashpw(bytePwd, bcrypt.gensalt())
-    return hashed_pw
+    return hashed_pw.decode('utf8')
 
 
 def validate_user_password(actual_password_hashed, provided_password: str):
@@ -37,6 +32,11 @@ def check_email_valid(email):
         return True
     else:
         return False
+
+
+@app.get("/", status_code=200)
+def root():
+    return {"message": "Hello User"}
 
 
 @api_router.post("/auth/register/", status_code=201, response_model=User)
@@ -56,6 +56,12 @@ def add_user_to_db(email, firstName, lastName, password):
             conn.close()
             encoded = jwt.encode({"email": email}, "secret", algorithm="HS256")
             print(jwt.decode(encoded, "secret", algorithms=["HS256"]))
+            return {"success": True, "message": "User added successfully", "data": {
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+                password: password,
+            }}
 
 
 @api_router.post("/auth/login/", status_code=200, response_model=User)
@@ -75,15 +81,14 @@ def login_user(email, password):
             user_password = row[0]
     except:
         print("Error, user with email {} not found".format(email))
-
-    print(user_password.encode('utf-8'))
-    print(hash_password(password))
-
-    validate_user_password(bytes(user_password), password)
+    if (validate_user_password(bytes(user_password, encoding='utf-8'), password)):
+        print("hooray")
+    else:
+        print("aww")
 
 
 app.include_router(api_router)
 
 if __name__ == '__main__':
-    # add_user_to_db('test@gmail.com', 'John', 'Doe', 'password')
-    login_user("test@gmail.com", 'password')
+    #add_user_to_db('lamyerson@gmail.com', 'Lance', 'Myerson', 'Kratos22')
+    login_user("lamyerson@gmail.com", 'Kratos22')
