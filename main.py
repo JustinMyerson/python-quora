@@ -1,13 +1,14 @@
-from encodings import utf_8
-import psycopg2
-
-from config import config
-from fastapi import FastAPI, APIRouter, HTTPException
-
-import bcrypt
+import os
 import re
+from encodings import utf_8
+from dotenv import load_dotenv
 import jwt
 
+import bcrypt
+import psycopg2
+from fastapi import APIRouter, FastAPI
+
+from config import config
 from user import User
 from user_data import USERS
 
@@ -15,6 +16,8 @@ app = FastAPI(openapi_url="/openapi.json")
 api_router = APIRouter()
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+
+load_dotenv()
 
 
 def hash_password(password):
@@ -54,13 +57,27 @@ def add_user_to_db(email, firstName, lastName, password):
             print("Records created successfully")
             cur.close()
             conn.close()
-            encoded = jwt.encode({"email": email}, "secret", algorithm="HS256")
-            print(jwt.decode(encoded, "secret", algorithms=["HS256"]))
+
+            payload_data = {
+                "email": email,
+                "firstName": firstName,
+                "lastName": lastName,
+                "password": hash_password(password)
+            }
+
+            token = jwt.encode(
+                payload=payload_data,
+                key=os.environ.get('JWT_KEY')
+            )
+
+            print(token)
+
             return {"success": True, "message": "User added successfully", "data": {
-                email: email,
-                firstName: firstName,
-                lastName: lastName,
-                password: password,
+                "email": email,
+                "firstName": firstName,
+                "lastName": lastName,
+                "password": hash_password(password),
+                "token": token
             }}
 
 
@@ -83,6 +100,17 @@ def login_user(email, password):
         print("Error, user with email {} not found".format(email))
     if (validate_user_password(bytes(user_password, encoding='utf-8'), password)):
         print("hooray")
+
+        payload_data = {
+            "email": email
+        }
+
+        token = jwt.encode(
+            payload=payload_data,
+            key=os.environ.get('JWT_KEY')
+        )
+
+        print(token)
     else:
         print("aww")
 
@@ -90,5 +118,5 @@ def login_user(email, password):
 app.include_router(api_router)
 
 if __name__ == '__main__':
-    #add_user_to_db('lamyerson@gmail.com', 'Lance', 'Myerson', 'Kratos22')
-    login_user("lamyerson@gmail.com", 'Kratos22')
+    add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
+    #login_user("lamyerson@gmail.com", 'Kratos22')
