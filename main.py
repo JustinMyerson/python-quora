@@ -98,7 +98,17 @@ def add_user_to_db(email, firstName, lastName, password):
     return JSONResponse(status_code=400, message="Enter a valid email address")
 
 
-@api_router.get("/auth/login/", status_code=200, response_model=User)
+@app.get("/auth/login/test", status_code=200)
+def test(email, password):
+    payload_data = {
+        "email": email,
+        "password": hash_password(password),
+        "status_code": 200
+    }
+    return JSONResponse(content=payload_data)
+
+
+@app.get("/auth/login/", status_code=200)
 def login_user(email, password):
     user_password = None
     params = config()
@@ -129,27 +139,20 @@ def login_user(email, password):
             )
 
             print(token)
+            return JSONResponse(payload_data, status_code=200)
 
         else:
-            return {
-                "errors": [
-                    {
-                        "status": "400",
-                        "title":  "Password Incorrect"
-                    }
-                ]
+            error_data = {
+                "email": email,
+                "Error": "Password is incorrect"
             }
+            return JSONResponse(error_data, status_code=400)
 
     except:
-        return {
-            "errors": [
-                {
-                    "status": "400",
-                    "title":  "Email Not Found",
-                    "detail": "Email address was not found in the DB"
-                }
-            ]
+        error_data = {
+            "Error": "Email address was not found"
         }
+        return JSONResponse(error_data, status_code=400)
 
 
 def change_password(token, old_password, new_password):
@@ -180,17 +183,17 @@ def reset_password(new_password):
     r = redis.Redis()
     # decoded_jwt = jwt.decode(token, key=os.environ.get(
     #     'JWT_KEY'), algorithms=['HS256', ])
-    #email = decoded_jwt['email']
+    # email = decoded_jwt['email']
     reset_token = int(
         ''.join(["{}".format(random.randint(0, 9)) for num in range(0, 5)]))
     send_reset_password_email(reset_token)
-    #r.mset({"password-reset-token-{email}": reset_token}, ex=600)
+    r.mset({"password-reset-token-{email}": reset_token}, ex=600)
 
 
 app.include_router(api_router)
 
 if __name__ == '__main__':
-    #add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
-    #login_user("lamyerson@gmail.com", 'Kratos23')
-    #change_password(token, 'Kratos22', 'Kratos23')
-    reset_password("Test")
+    # add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
+    login_user("lamyerson@gmail.com", 'Kratos23')
+    # change_password(token, 'Kratos22', 'Kratos23')
+    # reset_password("Test")
