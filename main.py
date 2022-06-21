@@ -64,7 +64,7 @@ def root():
     return {"message": "Hello justin"}
 
 
-@api_router.post("/auth/register/", status_code=201, response_model=User)
+@api_router.post("/auth/register/", status_code=201)
 def add_user_to_db(email, firstName, lastName, password):
     if check_email_valid(email):
         if (len(password) >= 8):
@@ -92,20 +92,17 @@ def add_user_to_db(email, firstName, lastName, password):
             )
 
             print(token)
-
             return JSONResponse(content=payload_data, status_code=201)
-        return JSONResponse(status_code=400, message="Enter a valid password that is longer or equal to 8 characters")
-    return JSONResponse(status_code=400, message="Enter a valid email address")
 
+        error_data = {
+            "Error": "Enter a valid password that is longer or equal to 8 characters"
+        }
+        return JSONResponse(error_data, status_code=400)
 
-@app.get("/auth/login/test", status_code=200)
-def test(email, password):
-    payload_data = {
-        "email": email,
-        "password": hash_password(password),
-        "status_code": 200
+    error_data = {
+        "Error": "Enter a valid email address"
     }
-    return JSONResponse(content=payload_data)
+    return JSONResponse(error_data, status_code=400)
 
 
 @app.get("/auth/login/", status_code=200)
