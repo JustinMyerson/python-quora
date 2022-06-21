@@ -1,14 +1,18 @@
-from email import message
+from cgitb import reset
 import email
-import os
-import re
-from encodings import utf_8
-from dotenv import load_dotenv
-import jwt
 import json
+import os
+import random
+import re
+from email import message
+from encodings import utf_8
 
 import bcrypt
+import jwt
 import psycopg2
+import redis
+import yagmail
+from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import JSONResponse
 
@@ -24,6 +28,17 @@ regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 global token
 
 load_dotenv()
+
+
+def send_reset_password_email(reset_code):
+    contents = [
+        "Here is your requested code to reset your password",
+        "Code: {}".format(reset_code)
+    ]
+    yag = yagmail.SMTP('jamyersondev@gmail.com',
+                       os.environ.get("GMAIL_APP_PASSWORD"))
+    yag.send('jamyersondev@gmail.com',
+             'Quora Reset Password Request', contents)
 
 
 def hash_password(password):
@@ -160,9 +175,20 @@ def change_password(token, old_password, new_password):
             conn.close()
 
 
+def reset_password(new_password):
+    r = redis.Redis()
+    # decoded_jwt = jwt.decode(token, key=os.environ.get(
+    #     'JWT_KEY'), algorithms=['HS256', ])
+    #email = decoded_jwt['email']
+    reset_token = random.randint(00000, 99999)
+    send_reset_password_email(reset_token)
+    #r.mset({"password-reset-token-{email}": reset_token}, ex=600)
+
+
 app.include_router(api_router)
 
 if __name__ == '__main__':
     #add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
-    login_user("lamyerson@gmail.com", 'Kratos22')
-    change_password(token, 'Kratos22', 'Kratos23')
+    #login_user("lamyerson@gmail.com", 'Kratos23')
+    #change_password(token, 'Kratos22', 'Kratos23')
+    reset_password("Test")
