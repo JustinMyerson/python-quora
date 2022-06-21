@@ -33,7 +33,8 @@ load_dotenv()
 def send_reset_password_email(reset_code):
     contents = [
         "Here is your requested code to reset your password",
-        "Code: {}".format(reset_code)
+        "Code: {}".format(reset_code),
+        "If you received this email erroneously please ignore it"
     ]
     yag = yagmail.SMTP('jamyersondev@gmail.com',
                        os.environ.get("GMAIL_APP_PASSWORD"))
@@ -180,7 +181,8 @@ def reset_password(new_password):
     # decoded_jwt = jwt.decode(token, key=os.environ.get(
     #     'JWT_KEY'), algorithms=['HS256', ])
     #email = decoded_jwt['email']
-    reset_token = random.randint(00000, 99999)
+    reset_token = int(
+        ''.join(["{}".format(random.randint(0, 9)) for num in range(0, 5)]))
     send_reset_password_email(reset_token)
     #r.mset({"password-reset-token-{email}": reset_token}, ex=600)
 
