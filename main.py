@@ -59,6 +59,11 @@ def check_email_valid(email):
         return False
 
 
+def get_decoded_jwt_token(jwt_token):
+    return jwt.decode(jwt_token, key=os.environ.get(
+        'JWT_KEY'), algorithms=['HS256', ])
+
+
 @app.get("/", status_code=200)
 def root():
     return {"message": "Hello justin"}
@@ -176,21 +181,36 @@ def change_password(token, old_password, new_password):
             conn.close()
 
 
-def reset_password(new_password):
-    r = redis.Redis()
-    # decoded_jwt = jwt.decode(token, key=os.environ.get(
-    #     'JWT_KEY'), algorithms=['HS256', ])
-    # email = decoded_jwt['email']
-    reset_token = int(
-        ''.join(["{}".format(random.randint(0, 9)) for num in range(0, 5)]))
-    send_reset_password_email(reset_token)
-    r.mset({"password-reset-token-{email}": reset_token}, ex=600)
+@api_router.post("/auth/password-reset", status_code=200)
+def reset_password(new_password, token):
+    try:
+        r = redis.Redis()
+        decoded_jwt = jwt.decode(token, key=os.environ.get(
+            'JWT_KEY'), algorithms=['HS256', ])
+        email = decoded_jwt['email']
+        reset_token = int(
+            ''.join(["{}".format(random.randint(0, 9)) for num in range(0, 5)]))
+        send_reset_password_email(reset_token)
+        key = "password-reset-token-{}".format(email[1: len(email)-1])
+        r.set("key", key)
+        r.set("reset-token", reset_token)
+        message_data = {
+            "new_password": new_password,
+            "token": token,
+            "Message": "You will receive a reset token on your email that will allow you to reset your password"
+        }
+        return JSONResponse(message_data, status_code=200)
+    except:
+        error_data = {
+            "Error": "There was an unforseen error that was encountered"}
+        print(error_data)
+        return JSONResponse(error_data, status_code=400)
 
 
 app.include_router(api_router)
 
 if __name__ == '__main__':
-    add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
+    # add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
     login_user("lamyerson@gmail.com", 'Kratos23')
-    change_password(token, 'Kratos22', 'Kratos23')
-    reset_password("Test")
+    # change_password(token, 'Kratos22', 'Kratos23')
+    reset_password("Test", token)
