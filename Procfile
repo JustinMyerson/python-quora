@@ -1,1 +1,1 @@
-heroku ps:scale web=1
+uvicorn main:app --reload
