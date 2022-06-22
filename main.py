@@ -190,7 +190,7 @@ def reset_password(new_password):
 app.include_router(api_router)
 
 if __name__ == '__main__':
-    # add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
+    add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
     login_user("lamyerson@gmail.com", 'Kratos23')
-    # change_password(token, 'Kratos22', 'Kratos23')
-    # reset_password("Test")
+    change_password(token, 'Kratos22', 'Kratos23')
+    reset_password("Test")
