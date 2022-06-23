@@ -14,12 +14,11 @@ from pydantic import BaseModel
 import redis
 import yagmail
 from dotenv import load_dotenv
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from config import config
-from user import User, loginUser, resetPassword
-from user_data import USERS
+from user import User, loginUser, resetPassword, changePassword
 
 app = FastAPI(openapi_url="/openapi.json")
 api_router = APIRouter()
@@ -127,7 +126,8 @@ def login_user(userToLogIn: loginUser):
 
         if (validate_user_password(bytes(user_password, encoding='utf-8'), userToLogIn.password)):
             payload_data = {
-                "Message": "User successfully logged in"
+                "email": email,
+                "password": user_password
             }
 
             global token
@@ -137,7 +137,7 @@ def login_user(userToLogIn: loginUser):
                 key=os.environ.get('JWT_KEY')
             )
 
-            return JSONResponse(payload_data, status_code=200)
+            return JSONResponse({"key": token}, status_code=200)
 
         else:
             error_data = {
@@ -152,28 +152,40 @@ def login_user(userToLogIn: loginUser):
         return JSONResponse(error_data, status_code=400)
 
 
-def change_password(token, old_password, new_password):
+@app.post("/auth/password")
+def change_password(passwordChange: changePassword, r: Request):
     email = ""
     password = ""
     params = config()
     conn = psycopg2.connect(**params)
     cur = conn.cursor()
 
-    if jwt.decode(token, key=os.environ.get('JWT_KEY'), algorithms=['HS256', ]):
-        decoded_jwt = jwt.decode(token, key=os.environ.get(
-            'JWT_KEY'), algorithms=['HS256', ])
+    try:
+        print(r.headers)
+        token = r.headers['authorization'].split(" ")[1]
+
+        if jwt.decode(token, key=os.environ.get('JWT_KEY'), algorithms=['HS256', ]):
+            decoded_jwt = jwt.decode(token, key=os.environ.get(
+                'JWT_KEY'), algorithms=['HS256', ])
         email = decoded_jwt['email']
         password = decoded_jwt['password']
-        print(password, 'PASSWORD')
 
-        if validate_user_password(bytes(password, encoding='utf-8'), old_password):
-            new_password = "'{}'".format(hash_password(new_password))
+        if validate_user_password(bytes(password, encoding='utf-8'), passwordChange.old_password):
+            print('j')
+            new_password = "'{}'".format(
+                hash_password(passwordChange.new_password))
             query = "UPDATE users SET password = {} WHERE email = {};".format(
                 new_password, email)
             cur.execute(query)
             conn.commit()
             cur.close()
             conn.close()
+            return JSONResponse({"message": "Password successfully changed", "auth": token}, status_code=200)
+        else:
+            return JSONResponse({"Error": "Old password is incorrect"}, status_code=400)
+
+    except:
+        return JSONResponse({"message": "error"}, status_code=400)
 
 
 @app.post("/auth/password-reset", status_code=200)
@@ -250,8 +262,7 @@ app.include_router(api_router)
 
 if __name__ == '__main__':
     # add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
-    login_user("lamyerson@gmail.com", 'Kratos23')
-    print(r.get("key"))
+    login_user("lamyerson@gmail.com", 'Kratos25')
     # change_password(token, 'Kratos22', 'Kratos23')
-    reset_password(token)
+    # reset_password(token)
     # confirm_reset_password("27806")
