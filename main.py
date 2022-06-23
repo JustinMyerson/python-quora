@@ -10,6 +10,7 @@ from encodings import utf_8
 import bcrypt
 import jwt
 import psycopg2
+from pydantic import BaseModel
 import redis
 import yagmail
 from dotenv import load_dotenv
@@ -17,7 +18,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import JSONResponse
 
 from config import config
-from user import User
+from user import User, resetPassword
 from user_data import USERS
 
 app = FastAPI(openapi_url="/openapi.json")
@@ -28,6 +29,8 @@ regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 global token
 
 load_dotenv()
+
+r = redis.Redis()
 
 
 def send_reset_password_email(reset_code):
@@ -181,10 +184,9 @@ def change_password(token, old_password, new_password):
             conn.close()
 
 
-@api_router.post("/auth/password-reset", status_code=200)
-def reset_password(new_password, token):
+@app.post("/auth/password-reset", status_code=200)
+def reset_password(token):
     try:
-        r = redis.Redis()
         decoded_jwt = jwt.decode(token, key=os.environ.get(
             'JWT_KEY'), algorithms=['HS256', ])
         email = decoded_jwt['email']
@@ -193,9 +195,8 @@ def reset_password(new_password, token):
         send_reset_password_email(reset_token)
         key = "password-reset-token-{}".format(email[1: len(email)-1])
         r.set("key", key)
-        r.set("reset-token", reset_token)
+        r.set("reset_token", reset_token)
         message_data = {
-            "new_password": new_password,
             "token": token,
             "Message": "You will receive a reset token on your email that will allow you to reset your password"
         }
@@ -207,10 +208,46 @@ def reset_password(new_password, token):
         return JSONResponse(error_data, status_code=400)
 
 
+@app.post("/auth/password-reset/confirm")
+def confirm_reset_password(resetPasswordData: resetPassword):
+    try:
+        user_reset_token = int(r.get('reset_token'))
+        user_email = str(r.get("key"))
+    except:
+        error_data = {
+            "Error": "No reset token could be found in the database"}
+        return JSONResponse(error_data, status_code=400)
+    if user_reset_token == int(resetPasswordData.reset_token):
+        if (resetPasswordData.email in user_email):
+            if (len(resetPasswordData.new_password) >= 8):
+                payload_data = {
+                    "email": resetPasswordData.email,
+                    "reset_token": resetPasswordData.reset_token,
+                    "message": "Passed, password reset token matches one in Redis"
+                }
+                return JSONResponse(payload_data, status_code=201)
+            else:
+                error_data = {
+                    "Error": "Password is not valid, please re-enter a valid password"
+                }
+                return JSONResponse(error_data, status_code=400)
+        else:
+            error_data = {
+                "Error": "Token does not match the email that was provided"
+            }
+            return JSONResponse(error_data, status_code=400)
+    else:
+        error_data = {
+            "Error": "The reset password code entered was incorrect or has expired"}
+        return JSONResponse(error_data, status_code=400)
+
+
 app.include_router(api_router)
 
 if __name__ == '__main__':
     # add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
     login_user("lamyerson@gmail.com", 'Kratos23')
+    print(r.get("key"))
     # change_password(token, 'Kratos22', 'Kratos23')
-    reset_password("Test", token)
+    reset_password(token)
+    # confirm_reset_password("27806")
