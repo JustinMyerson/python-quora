@@ -18,7 +18,7 @@ from fastapi import APIRouter, FastAPI
 from fastapi.responses import JSONResponse
 
 from config import config
-from user import User, resetPassword
+from user import User, loginUser, resetPassword
 from user_data import USERS
 
 app = FastAPI(openapi_url="/openapi.json")
@@ -67,11 +67,6 @@ def get_decoded_jwt_token(jwt_token):
         'JWT_KEY'), algorithms=['HS256', ])
 
 
-@app.get("/", status_code=200)
-def root():
-    return {"message": "Hello justin"}
-
-
 @app.post("/auth/register/")
 def add_user_to_db(userToAdd: User):
     if check_email_valid(userToAdd.email):
@@ -88,6 +83,7 @@ def add_user_to_db(userToAdd: User):
             conn.close()
 
             payload_data = {
+                "message": "User added to database successfully",
                 "email": userToAdd.email,
                 "firstName": userToAdd.firstName,
                 "lastName": userToAdd.lastName,
@@ -108,21 +104,19 @@ def add_user_to_db(userToAdd: User):
         return JSONResponse(error_data, status_code=400)
 
     error_data = {
-        "email": userToAdd.email,
-        "valid": check_email_valid(userToAdd.email),
         "Error": "Enter a valid email address"
     }
     return JSONResponse(error_data, status_code=400)
 
 
-@app.get("/auth/login/", status_code=200)
-def login_user(email, password):
+@app.post("/auth/login/")
+def login_user(userToLogIn: loginUser):
     user_password = None
     params = config()
     conn = psycopg2.connect(**params)
     cur = conn.cursor()
     try:
-        email = "'{}'".format(email)
+        email = "'{}'".format(userToLogIn.email)
         query = "SELECT password FROM users WHERE email = {}".format(
             email)
         cur.execute(query)
@@ -131,26 +125,22 @@ def login_user(email, password):
         for row in result:
             user_password = row[0]
 
-        if (validate_user_password(bytes(user_password, encoding='utf-8'), password)):
-            print("hooray")
-
+        if (validate_user_password(bytes(user_password, encoding='utf-8'), userToLogIn.password)):
             payload_data = {
-                "email": email,
-                "password": user_password
+                "Message": "User successfully logged in"
             }
 
             global token
+
             token = jwt.encode(
                 payload=payload_data,
                 key=os.environ.get('JWT_KEY')
             )
 
-            print(token)
             return JSONResponse(payload_data, status_code=200)
 
         else:
             error_data = {
-                "email": email,
                 "Error": "Password is incorrect"
             }
             return JSONResponse(error_data, status_code=400)
