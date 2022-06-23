@@ -220,10 +220,22 @@ def confirm_reset_password(resetPasswordData: resetPassword):
     if user_reset_token == int(resetPasswordData.reset_token):
         if (resetPasswordData.email in user_email):
             if (len(resetPasswordData.new_password) >= 8):
+                new_password = "'{}'".format(
+                    hash_password(resetPasswordData.new_password))
+                query = "UPDATE users SET password = {} WHERE email like {};".format(
+                    new_password, "'{}'".format(resetPasswordData.email))
+                params = config()
+                conn = psycopg2.connect(**params)
+                cur = conn.cursor()
+                cur.execute(query)
+                # conn.commit()
+                # cur.close()
+                # conn.close()
+
                 payload_data = {
                     "email": resetPasswordData.email,
                     "reset_token": resetPasswordData.reset_token,
-                    "message": "Passed, password reset token matches one in Redis"
+                    "message": "Password has successfully been reset"
                 }
                 return JSONResponse(payload_data, status_code=201)
             else:
