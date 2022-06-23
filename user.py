@@ -9,6 +9,11 @@ class User(BaseModel):
     password: str
 
 
+class changePassword(BaseModel):
+    old_password: str
+    new_password: str
+
+
 class resetPassword(BaseModel):
     email: str
     reset_token: int

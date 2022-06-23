@@ -72,26 +72,26 @@ def root():
     return {"message": "Hello justin"}
 
 
-@api_router.post("/auth/register/", status_code=201)
-def add_user_to_db(email, firstName, lastName, password):
-    if check_email_valid(email):
-        if (len(password) >= 8):
+@app.post("/auth/register/")
+def add_user_to_db(userToAdd: User):
+    if check_email_valid(userToAdd.email):
+        if (len(userToAdd.password) >= 8):
             params = config()
             conn = psycopg2.connect(**params)
             cur = conn.cursor()
             query = 'INSERT INTO users(email, firstName, lastName, password) VALUES (%s, %s, %s, %s)'
-            cur.execute(query, (email, firstName,
-                        lastName, hash_password(password)))
+            cur.execute(query, (userToAdd.email, userToAdd.firstName,
+                        userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
             print("Records created successfully")
             cur.close()
             conn.close()
 
             payload_data = {
-                "email": email,
-                "firstName": firstName,
-                "lastName": lastName,
-                "password": hash_password(password)
+                "email": userToAdd.email,
+                "firstName": userToAdd.firstName,
+                "lastName": userToAdd.lastName,
+                "password": hash_password(userToAdd.password)
             }
 
             token = jwt.encode(
@@ -108,6 +108,8 @@ def add_user_to_db(email, firstName, lastName, password):
         return JSONResponse(error_data, status_code=400)
 
     error_data = {
+        "email": userToAdd.email,
+        "valid": check_email_valid(userToAdd.email),
         "Error": "Enter a valid email address"
     }
     return JSONResponse(error_data, status_code=400)
