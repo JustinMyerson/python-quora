@@ -228,9 +228,9 @@ def confirm_reset_password(resetPasswordData: resetPassword):
                 conn = psycopg2.connect(**params)
                 cur = conn.cursor()
                 cur.execute(query)
-                # conn.commit()
-                # cur.close()
-                # conn.close()
+                conn.commit()
+                cur.close()
+                conn.close()
 
                 payload_data = {
                     "email": resetPasswordData.email,
