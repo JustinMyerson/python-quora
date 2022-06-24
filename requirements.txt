@@ -42,5 +42,4 @@ ujson==5.3.0
 unicodedata2==14.0.0
 uvicorn==0.17.6
 uvloop==0.16.0
-xmlrpclib==1.0.1
 zipp==3.8.0
