@@ -1,10 +1,8 @@
 from cgitb import reset
-import email
 import json
 import os
 import random
 import re
-from email import message
 from encodings import utf_8
 
 import bcrypt
@@ -64,6 +62,11 @@ def check_email_valid(email):
 def get_decoded_jwt_token(jwt_token):
     return jwt.decode(jwt_token, key=os.environ.get(
         'JWT_KEY'), algorithms=['HS256', ])
+
+
+@app.get("/test")
+def test():
+    return JSONResponse({"Message": "Test passed"}, status_code=201)
 
 
 @app.post("/auth/register/")
