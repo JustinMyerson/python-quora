@@ -7,8 +7,8 @@ from encodings import utf_8
 
 import bcrypt
 import jwt
+import uvicorn
 import psycopg2
-from pydantic import BaseModel
 import redis
 import yagmail
 from dotenv import load_dotenv
@@ -265,7 +265,8 @@ app.include_router(api_router)
 
 if __name__ == '__main__':
     # add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
-    login_user("lamyerson@gmail.com", 'Kratos25')
+    #login_user("lamyerson@gmail.com", 'Kratos25')
     # change_password(token, 'Kratos22', 'Kratos23')
     # reset_password(token)
     # confirm_reset_password("27806")
+    uvicorn.run("main:app", host="0.0.0.0", reload=True)
