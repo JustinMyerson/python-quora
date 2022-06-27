@@ -29,6 +29,8 @@ load_dotenv()
 
 r = redis.Redis()
 
+PORT = int(os.environ.get('PORT'))
+
 
 def send_reset_password_email(reset_code):
     contents = [
@@ -269,4 +271,4 @@ if __name__ == '__main__':
     # change_password(token, 'Kratos22', 'Kratos23')
     # reset_password(token)
     # confirm_reset_password("27806")
-    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=True)
