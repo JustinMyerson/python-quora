@@ -85,6 +85,12 @@ def get_decoded_jwt_token(jwt_token):
 def test():
     return JSONResponse({"Message": "Test passed"}, status_code=201)
 
+@app.get("/test")
+def get_table():
+    cur = conn.cursor()
+    query = 'SELECT * from users;'
+    cur.execute(query)
+    return JSONResponse({"Message": "Table found"}, status_code=201)
 
 @app.post("/auth/register/")
 def add_user_to_db(userToAdd: User):
@@ -93,11 +99,10 @@ def add_user_to_db(userToAdd: User):
             # params = config()
             # conn = psycopg2.connect(**params)
             cur = conn.cursor()
-            #query = 'INSERT INTO users("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
-            query2 = 'INSERT INTO users("email", "firstName", "lastName", "password") VALUES ('"test"', '"test"', '"test"', '"test"')';
-            cur.execute(query2)
-            # cur.execute(query2, (userToAdd.email, userToAdd.firstName,
-            #             userToAdd.lastName, hash_password(userToAdd.password)))
+            query = 'INSERT INTO users("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
+            cur.execute(query)
+            cur.execute(query, (userToAdd.email, userToAdd.firstName,
+                        userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
             print("Records created successfully")
             # cur.close()
