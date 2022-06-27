@@ -93,7 +93,7 @@ def add_user_to_db(userToAdd: User):
             # params = config()
             # conn = psycopg2.connect(**params)
             cur = conn.cursor()
-            query = 'INSERT INTO users(email, firstName, lastName, password) VALUES (%s, %s, %s, %s)'
+            query = 'INSERT INTO users(email, firstName, lastName, password) VALUES (%s, %s, %s, %s);'
             cur.execute(query, (userToAdd.email, userToAdd.firstName,
                         userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
@@ -136,7 +136,7 @@ def login_user(userToLogIn: loginUser):
     cur = conn.cursor()
     try:
         email = "'{}'".format(userToLogIn.email)
-        query = "SELECT password FROM users WHERE email = {}".format(
+        query = "SELECT password FROM users WHERE email = {};".format(
             email)
         cur.execute(query)
         result = cur.fetchall()
