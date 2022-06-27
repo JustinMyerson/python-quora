@@ -64,7 +64,7 @@ def get_decoded_jwt_token(jwt_token):
         'JWT_KEY'), algorithms=['HS256', ])
 
 
-@app.get("/test")
+@app.get("/")
 def test():
     return JSONResponse({"Message": "Test passed"}, status_code=201)
 
