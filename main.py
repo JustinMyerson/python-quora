@@ -269,4 +269,4 @@ if __name__ == '__main__':
     # change_password(token, 'Kratos22', 'Kratos23')
     # reset_password(token)
     # confirm_reset_password("27806")
-    uvicorn.run("main:app", host="0.0.0.0", reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
