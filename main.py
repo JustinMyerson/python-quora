@@ -44,7 +44,7 @@ conn = psycopg2.connect(
     password=password,
     host=host,
     port=port
-    )
+)
 
 
 def send_reset_password_email(reset_code):
@@ -93,7 +93,7 @@ def add_user_to_db(userToAdd: User):
             # params = config()
             # conn = psycopg2.connect(**params)
             cur = conn.cursor()
-            query = 'INSERT INTO public."users"("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
+            query = 'INSERT INTO "users"("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
             cur.execute(query, (userToAdd.email, userToAdd.firstName,
                         userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
