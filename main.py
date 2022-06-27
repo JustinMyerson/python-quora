@@ -4,6 +4,7 @@ import os
 import random
 import re
 from encodings import utf_8
+from urllib.parse import urlparse
 
 import bcrypt
 import jwt
@@ -30,6 +31,20 @@ load_dotenv()
 r = redis.Redis()
 
 PORT = int(os.environ.get('PORT'))
+
+url = urlparse.urlparse(os.environ['DATABASE_URL'])
+dbname = url.path[1:]
+user = url.username
+password = url.password
+host = url.hostname
+port = url.port
+conn = psycopg2.connect(
+    dbname=dbname,
+    user=user,
+    password=password,
+    host=host,
+    port=port
+    )
 
 
 def send_reset_password_email(reset_code):
@@ -75,16 +90,16 @@ def test():
 def add_user_to_db(userToAdd: User):
     if check_email_valid(userToAdd.email):
         if (len(userToAdd.password) >= 8):
-            params = config()
-            conn = psycopg2.connect(**params)
+            # params = config()
+            # conn = psycopg2.connect(**params)
             cur = conn.cursor()
             query = 'INSERT INTO users(email, firstName, lastName, password) VALUES (%s, %s, %s, %s)'
             cur.execute(query, (userToAdd.email, userToAdd.firstName,
                         userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
             print("Records created successfully")
-            cur.close()
-            conn.close()
+            # cur.close()
+            # conn.close()
 
             payload_data = {
                 "message": "User added to database successfully",
@@ -116,8 +131,8 @@ def add_user_to_db(userToAdd: User):
 @app.post("/auth/login/")
 def login_user(userToLogIn: loginUser):
     user_password = None
-    params = config()
-    conn = psycopg2.connect(**params)
+    # params = config()
+    # conn = psycopg2.connect(**params)
     cur = conn.cursor()
     try:
         email = "'{}'".format(userToLogIn.email)
@@ -161,8 +176,8 @@ def login_user(userToLogIn: loginUser):
 def change_password(passwordChange: changePassword, r: Request):
     email = ""
     password = ""
-    params = config()
-    conn = psycopg2.connect(**params)
+    # params = config()
+    # conn = psycopg2.connect(**params)
     cur = conn.cursor()
 
     try:
@@ -183,8 +198,8 @@ def change_password(passwordChange: changePassword, r: Request):
                 new_password, email)
             cur.execute(query)
             conn.commit()
-            cur.close()
-            conn.close()
+            # cur.close()
+            # conn.close()
             return JSONResponse({"message": "Password successfully changed", "auth": token}, status_code=200)
         else:
             return JSONResponse({"Error": "Old password is incorrect"}, status_code=400)
@@ -233,13 +248,13 @@ def confirm_reset_password(resetPasswordData: resetPassword):
                     hash_password(resetPasswordData.new_password))
                 query = "UPDATE users SET password = {} WHERE email like {};".format(
                     new_password, "'{}'".format(resetPasswordData.email))
-                params = config()
-                conn = psycopg2.connect(**params)
+                # params = config()
+                # conn = psycopg2.connect(**params)
                 cur = conn.cursor()
                 cur.execute(query)
                 conn.commit()
-                cur.close()
-                conn.close()
+                # cur.close()
+                # conn.close()
 
                 payload_data = {
                     "email": resetPasswordData.email,
