@@ -93,9 +93,11 @@ def add_user_to_db(userToAdd: User):
             # params = config()
             # conn = psycopg2.connect(**params)
             cur = conn.cursor()
-            query = 'INSERT INTO users("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
-            cur.execute(query, (userToAdd.email, userToAdd.firstName,
-                        userToAdd.lastName, hash_password(userToAdd.password)))
+            #query = 'INSERT INTO users("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
+            query2 = 'INSERT INTO users("email", "firstName", "lastName", "password") VALUES ('"test"', '"test"', '"test"', '"test"')';
+            cur.execute(query2)
+            # cur.execute(query2, (userToAdd.email, userToAdd.firstName,
+            #             userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
             print("Records created successfully")
             # cur.close()
