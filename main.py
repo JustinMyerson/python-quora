@@ -273,7 +273,7 @@ def confirm_reset_password(resetPasswordData: resetPassword):
             "Error": "The reset password code entered was incorrect or has expired"}
         return JSONResponse(error_data, status_code=400)
     
-@app.get("/search/accounts?email=")
+@app.get("/search/accounts")
 def search_for_user(user: searchForUser):
     query = "select email, firstName, lastName from users where email like '%s'".format(user.email)
     cur = conn.cursor()
