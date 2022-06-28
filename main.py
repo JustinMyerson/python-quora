@@ -276,15 +276,17 @@ def confirm_reset_password(resetPasswordData: resetPassword):
 @app.get("/search/accounts")
 def search_for_user(user: searchForUser):
     query = 'select "email", "firstName", "lastName" from users where "email" like {}'.format(user.email)
-    cur = conn.cursor()
-    cur.execute(query)
 
     try:
-        cur.fetchone()
-        return JSONResponse({"Email": user.email, "cur fetch one": cur.fetchone()}, status_code=201)
+        cur = conn.cursor()
+        cur.execute(query)
+        if cur.fetchone():
+            return JSONResponse({"Email": user.email, "cur fetch one": cur.fetchone()}, status_code=201)
+        else: 
+            return JSONResponse({"Email": user.email, "Error": "Error"}, status_code=400)
     except:
         print("Didn't work")
-        return JSONResponse({"Error": "User not found"}, status_code=400)
+        return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
 
 
