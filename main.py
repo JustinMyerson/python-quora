@@ -281,7 +281,7 @@ def search_for_user(user: searchForUser):
 
     try:
         cur.fetchone()
-        return JSONResponse({"Email": user.email, "First Name": user.firstName, "Surname": user.lastName}, status_code=201)
+        return JSONResponse({"Email": user.email, "cur fetch one": cur.fetchone()}, status_code=201)
     except:
         print("Didn't work")
         return JSONResponse({"Error": "User not found"}, status_code=400)

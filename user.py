@@ -25,5 +25,3 @@ class resetPassword(BaseModel):
 
 class searchForUser(BaseModel):
     email: str
-    firstName: str
-    lastName: str
