@@ -138,12 +138,10 @@ def add_user_to_db(userToAdd: User):
 @app.post("/auth/login/")
 def login_user(userToLogIn: loginUser):
     user_password = None
-    # params = config()
-    # conn = psycopg2.connect(**params)
     cur = conn.cursor()
     try:
         email = "'{}'".format(userToLogIn.email)
-        query = "SELECT password FROM public.\"users\" WHERE email = {};".format(
+        query = "SELECT password FROM users WHERE email = {};".format(
             email)
         cur.execute(query)
         result = cur.fetchall()
