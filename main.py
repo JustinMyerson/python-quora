@@ -283,7 +283,7 @@ def search_for_user(user: searchForUser):
         if cur.fetchall():
             results = cur.fetchall()
             for row in results:
-                print(row[0])
+                print("row", row[0], "row one")
                 #one = row[0]
                 # two = row[1]
                 # three = row[2]
