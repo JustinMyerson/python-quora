@@ -17,7 +17,7 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from config import config
-from user import User, loginUser, resetPassword, changePassword
+from user import User, loginUser, resetPassword, changePassword, searchForUser
 
 app = FastAPI(openapi_url="/openapi.json")
 api_router = APIRouter()
@@ -181,8 +181,6 @@ def login_user(userToLogIn: loginUser):
 def change_password(passwordChange: changePassword, r: Request):
     email = ""
     password = ""
-    # params = config()
-    # conn = psycopg2.connect(**params)
     cur = conn.cursor()
 
     try:
@@ -203,8 +201,6 @@ def change_password(passwordChange: changePassword, r: Request):
                 new_password, email)
             cur.execute(query)
             conn.commit()
-            # cur.close()
-            # conn.close()
             return JSONResponse({"message": "Password successfully changed", "auth": token}, status_code=200)
         else:
             return JSONResponse({"Error": "Old password is incorrect"}, status_code=400)
@@ -233,7 +229,6 @@ def reset_password(token):
     except:
         error_data = {
             "Error": "There was an unforseen error that was encountered"}
-        print(error_data)
         return JSONResponse(error_data, status_code=400)
 
 
@@ -253,13 +248,9 @@ def confirm_reset_password(resetPasswordData: resetPassword):
                     hash_password(resetPasswordData.new_password))
                 query = "UPDATE public.\"users\" SET password = {} WHERE email like {};".format(
                     new_password, "'{}'".format(resetPasswordData.email))
-                # params = config()
-                # conn = psycopg2.connect(**params)
                 cur = conn.cursor()
                 cur.execute(query)
                 conn.commit()
-                # cur.close()
-                # conn.close()
 
                 payload_data = {
                     "email": resetPasswordData.email,
@@ -281,14 +272,22 @@ def confirm_reset_password(resetPasswordData: resetPassword):
         error_data = {
             "Error": "The reset password code entered was incorrect or has expired"}
         return JSONResponse(error_data, status_code=400)
+    
+@app.get("/search/accounts?email=")
+def search_for_user(user: searchForUser):
+    query = "select email, firstName, lastName from users where email like '%s'".format(user.email)
+    cur = conn.cursor()
+    cur.execute(query)
+
+    try:
+        cur.fetchone()
+    except:
+        print("Didn't work")
+
+
 
 
 app.include_router(api_router)
 
 if __name__ == '__main__':
-    # add_user_to_db('ababa@gmail.com', 'Aba', 'Saba', 'password')
-    #login_user("lamyerson@gmail.com", 'Kratos25')
-    # change_password(token, 'Kratos22', 'Kratos23')
-    # reset_password(token)
-    # confirm_reset_password("27806")
     uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=True)

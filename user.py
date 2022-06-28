@@ -22,3 +22,8 @@ class resetPassword(BaseModel):
     email: str
     reset_token: int
     new_password: str
+
+class searchForUser(BaseModel):
+    email: str
+    firstName: str
+    lastName: str
