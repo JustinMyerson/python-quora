@@ -287,6 +287,8 @@ def search_for_user(user: searchForUser):
         print("five")
         for row in results:
             print("row", row[0], "row one")
+            print("row", row[1], "row two")
+            print("row", row[2], "row three")
             #one = row[0]
             # two = row[1]
             # three = row[2]
