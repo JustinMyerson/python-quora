@@ -281,7 +281,12 @@ def search_for_user(user: searchForUser):
         cur = conn.cursor()
         cur.execute(query)
         if cur.fetchone():
-            return JSONResponse({"Email": user.email, "cur fetch one": cur.fetchone()}, status_code=201)
+            results = cur.fetchall()
+            for row in results:
+                one = row[0]
+                two = row[1]
+                three = row[2]
+            return JSONResponse({"Email": user.email, "one": one, "two": two, "three": three}, status_code=201)
         else: 
             return JSONResponse({"Email": user.email, "Error": "Error"}, status_code=400)
     except:
