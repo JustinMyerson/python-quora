@@ -288,7 +288,7 @@ def search_for_user(user: searchForUser):
             print("row", row[1], "row two")
             user_name = row[1]
             print("row", row[2], "row three")
-            user_surname = row[3]
+            user_surname = row[2]
         return JSONResponse({"Email": user_email, "First Name": user_name, "Surname": user_surname}, status_code=201)
     except:
         print("Didn't workkk")
