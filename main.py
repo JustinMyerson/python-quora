@@ -101,17 +101,12 @@ def get_table():
 def add_user_to_db(userToAdd: User):
     if check_email_valid(userToAdd.email):
         if (len(userToAdd.password) >= 8):
-            # params = config()
-            # conn = psycopg2.connect(**params)
             cur = conn.cursor()
             query = 'INSERT INTO users("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
-            cur.execute(query)
             cur.execute(query, (userToAdd.email, userToAdd.firstName,
                         userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
             print("Records created successfully")
-            # cur.close()
-            # conn.close()
 
             payload_data = {
                 "message": "User added to database successfully",
