@@ -275,7 +275,7 @@ def confirm_reset_password(resetPasswordData: resetPassword):
     
 @app.get("/search/accounts")
 def search_for_user(user: searchForUser):
-    query = 'select "email", "firstName", "lastName" from users where email like {}'.format(user.email)
+    query = 'select "email", "firstName", "lastName" from users where "email" like {}'.format(user.email)
     cur = conn.cursor()
     cur.execute(query)
 
