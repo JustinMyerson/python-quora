@@ -278,18 +278,19 @@ def search_for_user(user: searchForUser):
     query = 'select "email", "firstName", "lastName" from users where "email" like {}'.format(user.email)
 
     try:
+        print("one")
         cur = conn.cursor()
+        print("two")
         cur.execute(query)
-        if cur.fetchall():
-            results = cur.fetchall()
-            for row in results:
-                print("row", row[0], "row one")
-                #one = row[0]
-                # two = row[1]
-                # three = row[2]
-            return JSONResponse({"Email": user.email}, status_code=201)
-        else: 
-            return JSONResponse({"Email": user.email, "Error": "Error"}, status_code=400)
+        print("three")
+        results = cur.fetchall()
+        print("five")
+        for row in results:
+            print("row", row[0], "row one")
+            #one = row[0]
+            # two = row[1]
+            # three = row[2]
+        return JSONResponse({"Email": user.email}, status_code=201)
     except:
         print("Didn't workkk")
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
