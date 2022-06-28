@@ -85,10 +85,10 @@ def get_decoded_jwt_token(jwt_token):
 def test():
     return JSONResponse({"Message": "Test passed"}, status_code=201)
 
-@app.get("/test")
+@app.post("/test")
 def get_table():
     cur = conn.cursor()
-    query = 'SELECT * from users;'
+    query = 'insert into users("email", "password", "firstName", "lastName") values(.test., .test., .test., .test.);'.replace(".", "'")
     cur.execute(query)
     return JSONResponse({"Message": "Table found"}, status_code=201)
 
