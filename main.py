@@ -276,23 +276,20 @@ def confirm_reset_password(resetPasswordData: resetPassword):
 @app.get("/search/accounts")
 def search_for_user(user: searchForUser):
     query = 'select "email", "firstName", "lastName" from users where "email" like {}'.format(user.email)
+    user_name, user_surname, user_email = None
 
     try:
-        print("one")
         cur = conn.cursor()
-        print("two")
         cur.execute(query)
-        print("three")
         results = cur.fetchall()
-        print("five")
         for row in results:
             print("row", row[0], "row one")
+            user_email = row[0]
             print("row", row[1], "row two")
+            user_name = row[1]
             print("row", row[2], "row three")
-            #one = row[0]
-            # two = row[1]
-            # three = row[2]
-        return JSONResponse({"Email": user.email}, status_code=201)
+            user_surname = row[3]
+        return JSONResponse({"Email": user_email, "First Name": user_name, "Surname": user_surname}, status_code=201)
     except:
         print("Didn't workkk")
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
