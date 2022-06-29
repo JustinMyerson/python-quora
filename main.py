@@ -274,7 +274,7 @@ def confirm_reset_password(resetPasswordData: resetPassword):
         return JSONResponse(error_data, status_code=400)
     
 @app.get("/search/accounts")
-def search_for_user(user: searchForUser):
+def search_for_user(email: str):
     query = 'select "email", "firstName", "lastName" from users where "email" like {}'.format(user.email)
     user_name, user_surname, user_email = "", "", ""
 
