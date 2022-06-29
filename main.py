@@ -92,7 +92,7 @@ def test_post():
 @app.post("/test")
 def get_table():
     cur = conn.cursor()
-    query = 'insert into UsersTable("email", "password", "firstName", "lastName") values(.test., .test., .test., .test.);'.replace(".", "'")
+    query = 'insert into "UsersTable"("email", "password", "firstName", "lastName") values(.test., .test., .test., .test.);'.replace(".", "'")
     cur.execute(query)
     conn.commit()
     return JSONResponse({"Message": "Successfully inserted values into table"}, status_code=201)
@@ -304,14 +304,22 @@ def follow_user(id: int):
 
     try:
         cur = conn.cursor()
+        print("1")
         cur.execute(query)
+        print("2")
         results = cur.fetchall()
+        print("3")
         if len(results) != 0:
             for row in results:
+                print("4")
                 user_id = row[0]
+                print("5")
                 user_email = row[1]
+                print("6")
                 user_name = row[2]
+                print("7")
                 user_surname = row[3]
+                print("8")
             response_data = {"success": True, "message": "Successfully following user - {} {} {} {}".format(user_id, user_email, user_name, user_surname)}
             return JSONResponse(response_data, status_code=201)
         else:
