@@ -102,7 +102,7 @@ def add_user_to_db(userToAdd: User):
     if check_email_valid(userToAdd.email):
         if (len(userToAdd.password) >= 8):
             cur = conn.cursor()
-            query = 'INSERT INTO UsersTable("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
+            query = 'INSERT INTO "UsersTable"("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
             cur.execute(query, (userToAdd.email, userToAdd.firstName,
                         userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
