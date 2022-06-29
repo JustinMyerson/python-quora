@@ -298,9 +298,9 @@ def search_for_user(email: str):
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
 @app.post("/accounts/follow")
-def follow_user(email: str):
-    query = 'select "email", "firstName", "lastName" from UsersTable where "email" like {}'.format(email)
-    user_name, user_surname, user_email = "", "", ""
+def follow_user(id: int):
+    query = 'select "id", "email", "firstName", "lastName" from UsersTable where id = {}'.format(id)
+    user_id, user_name, user_surname, user_email = "", "", "", ""
 
     try:
         cur = conn.cursor()
@@ -308,15 +308,14 @@ def follow_user(email: str):
         results = cur.fetchall()
         if len(results) != 0:
             for row in results:
-                print("row", row[0], "row one")
-                user_email = row[0]
-                print("row", row[1], "row two")
-                user_name = row[1]
-                print("row", row[2], "row three")
-                user_surname = row[2]
-            return JSONResponse({"Message": "Successfully following user - {} {}".format(user_name, user_surname)}, status_code=201)
+                user_id = row[0]
+                user_email = row[1]
+                user_name = row[2]
+                user_surname = row[3]
+            response_data = {"success": True, "message": "Successfully following user - {} {} {} {}".format(user_id, user_email, user_name, user_surname)}
+            return JSONResponse(response_data, status_code=201)
         else:
-            return JSONResponse({"Error": "User was not found with email {}".format(email)}, status_code=400)
+            return JSONResponse({"Error": "User was not found with id {}".format(id)}, status_code=400)
     except:
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
