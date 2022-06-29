@@ -92,7 +92,7 @@ def test_post():
 @app.post("/test")
 def get_table():
     cur = conn.cursor()
-    query = 'insert into users("email", "password", "firstName", "lastName") values(.test., .test., .test., .test.);'.replace(".", "'")
+    query = 'insert into UsersTable("email", "password", "firstName", "lastName") values(.test., .test., .test., .test.);'.replace(".", "'")
     cur.execute(query)
     conn.commit()
     return JSONResponse({"Message": "Successfully inserted values into table"}, status_code=201)
@@ -102,7 +102,7 @@ def add_user_to_db(userToAdd: User):
     if check_email_valid(userToAdd.email):
         if (len(userToAdd.password) >= 8):
             cur = conn.cursor()
-            query = 'INSERT INTO users("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
+            query = 'INSERT INTO UsersTable("email", "firstName", "lastName", "password") VALUES (%s, %s, %s, %s);'
             cur.execute(query, (userToAdd.email, userToAdd.firstName,
                         userToAdd.lastName, hash_password(userToAdd.password)))
             conn.commit()
@@ -141,7 +141,7 @@ def login_user(userToLogIn: loginUser):
     cur = conn.cursor()
     try:
         email = "'{}'".format(userToLogIn.email)
-        query = "SELECT password FROM users WHERE email = {};".format(
+        query = "SELECT password FROM UsersTable WHERE email = {};".format(
             email)
         cur.execute(query)
         result = cur.fetchall()
@@ -246,7 +246,7 @@ def confirm_reset_password(resetPasswordData: resetPassword):
             if (len(resetPasswordData.new_password) >= 8):
                 new_password = "'{}'".format(
                     hash_password(resetPasswordData.new_password))
-                query = "UPDATE public.\"users\" SET password = {} WHERE email like {};".format(
+                query = 'UPDATE "UsersTable" SET password = {} WHERE email like {};'.format(
                     new_password, "'{}'".format(resetPasswordData.email))
                 cur = conn.cursor()
                 cur.execute(query)
@@ -276,7 +276,7 @@ def confirm_reset_password(resetPasswordData: resetPassword):
 @app.get("/search/accounts")
 def search_for_user(email: str):
 
-    query = 'select "email", "firstName", "lastName" from users where "email" like {}'.format(email)
+    query = 'select "email", "firstName", "lastName" from UsersTable where "email" like {}'.format(email)
     user_name, user_surname, user_email = "", "", ""
 
     try:
@@ -295,12 +295,11 @@ def search_for_user(email: str):
         else:
             return JSONResponse({"Error": "User was not found with email {}".format(email)}, status_code=400)
     except:
-        print("Didn't workkk")
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
 @app.post("/accounts/follow")
 def follow_user(email: str):
-    query = 'select "email", "firstName", "lastName" from users where "email" like {}'.format(email)
+    query = 'select "email", "firstName", "lastName" from UsersTable where "email" like {}'.format(email)
     user_name, user_surname, user_email = "", "", ""
 
     try:
@@ -319,7 +318,6 @@ def follow_user(email: str):
         else:
             return JSONResponse({"Error": "User was not found with email {}".format(email)}, status_code=400)
     except:
-        print("Didn't workkk")
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
 
