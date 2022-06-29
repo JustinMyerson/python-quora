@@ -283,19 +283,44 @@ def search_for_user(email: str):
         cur = conn.cursor()
         cur.execute(query)
         results = cur.fetchall()
-        for row in results:
-            print("row", row[0], "row one")
-            user_email = row[0]
-            print("row", row[1], "row two")
-            user_name = row[1]
-            print("row", row[2], "row three")
-            user_surname = row[2]
-        return JSONResponse({"Email": user_email, "First Name": user_name, "Surname": user_surname}, status_code=201)
+        if len(results) != 0:
+            for row in results:
+                print("row", row[0], "row one")
+                user_email = row[0]
+                print("row", row[1], "row two")
+                user_name = row[1]
+                print("row", row[2], "row three")
+                user_surname = row[2]
+            return JSONResponse({"Email": user_email, "First Name": user_name, "Surname": user_surname}, status_code=201)
+        else:
+            return JSONResponse({"Error": "User was not found with email {}".format(email)}, status_code=400)
     except:
         print("Didn't workkk")
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
+@app.post("/accounts/follow")
+def follow_user(email: str):
+    query = 'select "email", "firstName", "lastName" from users where "email" like {}'.format(email)
+    user_name, user_surname, user_email = "", "", ""
 
+    try:
+        cur = conn.cursor()
+        cur.execute(query)
+        results = cur.fetchall()
+        if len(results) != 0:
+            for row in results:
+                print("row", row[0], "row one")
+                user_email = row[0]
+                print("row", row[1], "row two")
+                user_name = row[1]
+                print("row", row[2], "row three")
+                user_surname = row[2]
+            return JSONResponse({"Message": "Successfully following user - {} {}".format(user_name, user_surname)}, status_code=201)
+        else:
+            return JSONResponse({"Error": "User was not found with email {}".format(email)}, status_code=400)
+    except:
+        print("Didn't workkk")
+        return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
 
 app.include_router(api_router)
