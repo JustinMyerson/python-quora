@@ -299,10 +299,11 @@ def search_for_user(email: str):
 
 @app.post("/accounts/follow")
 def follow_user(id: int):
-    query = 'select "id", "email", "firstName", "lastName" from UsersTable where id = {}'.format(id)
+    query = 'select "id", "email", "firstName", "lastName" from UsersTable where "id" = {}'.format(id)
     user_id, user_name, user_surname, user_email = "", "", "", ""
 
     try:
+        print("0")
         cur = conn.cursor()
         print("1")
         cur.execute(query)
