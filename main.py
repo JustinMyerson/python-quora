@@ -276,7 +276,7 @@ def confirm_reset_password(resetPasswordData: resetPassword):
 @app.get("/search/accounts")
 def search_for_user(email: str):
 
-    query = 'select "email", "firstName", "lastName" from UsersTable where "email" like {}'.format(email)
+    query = 'select "email", "firstName", "lastName" from "UsersTable" where "email" like {}'.format(email)
     user_name, user_surname, user_email = "", "", ""
 
     try:
