@@ -300,7 +300,7 @@ def search_for_user(email: str):
 @app.post("/accounts/follow")
 def follow_user(id: int):
     query = 'select "id", "email", "firstName", "lastName" from "UsersTable" where "id" = {}'.format(id)
-    user_id, user_name, user_surname, user_email = "", "", "", ""
+    follower_id, follower_name, follower_surname, follower_email = "", "", "", ""
 
     try:
         print("0")
@@ -313,15 +313,19 @@ def follow_user(id: int):
         if len(results) != 0:
             for row in results:
                 print("4")
-                user_id = row[0]
+                follower_id = row[0]
                 print("5")
-                user_email = row[1]
+                follower_email = row[1]
                 print("6")
-                user_name = row[2]
+                follower_name = row[2]
                 print("7")
-                user_surname = row[3]
+                follower_surname = row[3]
                 print("8")
-            response_data = {"success": True, "message": "Successfully following user - {} {} {} {}".format(user_id, user_email, user_name, user_surname)}
+            follow_query = 'INSERT INTO "FollowersTable"("userId", "followedById") VALUES (%s, %s);'
+            print("9")
+            cur.execute(follow_query, (1, follower_id))
+            print("10")
+            response_data = {"success": True, "message": "Successfully following user - {} {} {} {}".format(follower_id, follower_email, follower_name, follower_surname)}
             return JSONResponse(response_data, status_code=201)
         else:
             return JSONResponse({"Error": "User was not found with id {}".format(id)}, status_code=400)
