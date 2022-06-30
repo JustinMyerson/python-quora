@@ -17,7 +17,7 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from config import config
-from user import User, loginUser, resetPassword, changePassword, searchForUser
+from user import User, loginUser, questionToPost, resetPassword, changePassword, searchForUser
 
 app = FastAPI(openapi_url="/openapi.json")
 api_router = APIRouter()
@@ -361,8 +361,22 @@ def show_accounts_following(id: int):
                         'lastName': r[2]} for r in results]
             return JSONResponse({"success": True, "message": "Successfully retrieved followed accounts", "data": dict_result}, status_code=201)
         else:
-            return JSONResponse({"success": True, "message": "User has no followers"}, status_code=400)
+            return JSONResponse({"success": True, "message": "User is not following anyone"}, status_code=400)
     except:
+        return JSONResponse({"Error": "Query was not processable"}, status_code=400)
+
+@app.post("/questions")
+def post_question(question: questionToPost):
+    query = 'insert into "QuestionsTable"("title", "description", "userId") values({}, {}, {});'
+    try:
+        cur = conn.cursor()
+        print(1)
+        cur.execute(query, (question.title, question.description, question.userId))
+        print(2)
+        conn.commit()
+        print(3)
+        return JSONResponse({"success": True, "message": "Question successfully posted"}, status_code=201)
+    except: 
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
 app.include_router(api_router)

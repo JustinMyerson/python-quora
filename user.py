@@ -25,3 +25,8 @@ class resetPassword(BaseModel):
 
 class searchForUser(BaseModel):
     email: str
+
+class questionToPost(BaseModel):
+    title: str
+    description: str
+    userId: int
