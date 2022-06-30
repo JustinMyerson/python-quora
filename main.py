@@ -380,6 +380,22 @@ def post_question(question: questionToPost):
     except: 
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
+@app.get("/questions")
+def show_questions_posted(id: int):
+    query = 'select "QuestionsTable"."id", "title", "description" from "QuestionsTable" inner join "UsersTable" on "UsersTable"."id" = "QuestionsTable"."userId" where ("QuestionsTable"."userId" = {});'.format(id)
+    try:
+        cur = conn.cursor()
+        cur.execute(query)
+        results = cur.fetchall()
+        if len(results) != 0:
+            dict_result = [{'id': r[0], 'title': r[1],
+                        'description': r[2]} for r in results]
+            return JSONResponse({"success": True, "message": "Successfully retrieved questions", "data": dict_result}, status_code=201)
+        else:
+            return JSONResponse({"success": True, "message": "User has not posted any questions"}, status_code=400)
+    except:
+        return JSONResponse({"Error": "Query was not processable"}, status_code=400)
+
 app.include_router(api_router)
 
 if __name__ == '__main__':
