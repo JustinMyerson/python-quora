@@ -341,9 +341,9 @@ def show_accounts_following(id: int):
         cur.execute(query)
         results = cur.fetchall()
         if len(results) != 0:
-            for row in results:
-                print(row, "ROW")
-            return JSONResponse({"success": True}, status_code=201)
+            dict_result = [{'email': r[0], 'firstName': r[1],
+                        'lastName': r[2]} for r in results]
+            return JSONResponse({"success": True, "message": "Successfully retrieved followed accounts", "data": dict_result}, status_code=201)
         else:
             return JSONResponse({"success": True, "message": "User has no followers"}, status_code=400)
     except:
