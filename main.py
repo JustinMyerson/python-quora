@@ -368,6 +368,7 @@ def show_accounts_following(id: int):
 @app.post("/questions")
 def post_question(question: questionToPost):
     query = 'insert into "QuestionsTable"("title", "description", "userId") values({}, {}, {});'.format(question.title, question.description, question.userId)
+    print(query, "query")
     try:
         cur = conn.cursor()
         print("1")
