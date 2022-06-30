@@ -275,7 +275,6 @@ def confirm_reset_password(resetPasswordData: resetPassword):
     
 @app.get("/search/accounts")
 def search_for_user(email: str):
-
     query = 'select "email", "firstName", "lastName" from "UsersTable" where "email" like {}'.format(email)
     user_name, user_surname, user_email = "", "", ""
 
@@ -331,6 +330,22 @@ def follow_user(id: int):
             return JSONResponse(response_data, status_code=201)
         else:
             return JSONResponse({"Error": "User was not found with id {}".format(id)}, status_code=400)
+    except:
+        return JSONResponse({"Error": "Query was not processable"}, status_code=400)
+
+@app.post("/accounts/following")
+def show_accounts_following(id: int):
+    query = 'select "email", "firstName", "lastName" from "UsersTable" inner join "FollowersTable" on "UsersTable"."id" = "FollowersTable"."followedById" where ("FollowersTable"."userId" = {});'.format(id)
+    try:
+        cur = conn.cursor()
+        cur.execute(query)
+        results = cur.fetchall()
+        if len(results) != 0:
+            for row in results:
+                print(row, "ROW")
+            return JSONResponse({"success": True}, status_code=201)
+        else:
+            return JSONResponse({"success": True, "message": "User has no followers"}, status_code=400)
     except:
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
