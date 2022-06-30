@@ -325,7 +325,9 @@ def follow_user(id: int):
             print("9")
             cur.execute(follow_query, (1, follower_id))
             print("10")
-            response_data = {"success": True, "message": "Successfully following user - {} {} {} {}".format(follower_id, follower_email, follower_name, follower_surname)}
+            cur.commit()
+            print("11")
+            response_data = {"success": True, "message": "User {} is now successfully following user - {} {} {} {}".format(id, follower_id, follower_email, follower_name, follower_surname)}
             return JSONResponse(response_data, status_code=201)
         else:
             return JSONResponse({"Error": "User was not found with id {}".format(id)}, status_code=400)
