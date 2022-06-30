@@ -335,13 +335,13 @@ def follow_user(id: int):
 
 @app.post("/accounts/following")
 def show_accounts_following(id: int):
-    query = 'select "email", "firstName", "lastName" from "UsersTable" inner join "FollowersTable" on "UsersTable"."id" = "FollowersTable"."followedById" where ("FollowersTable"."userId" = {});'.format(id)
+    query = 'select "UsersTable"."id", "firstName", "lastName" from "UsersTable" inner join "FollowersTable" on "UsersTable"."id" = "FollowersTable"."followedById" where ("FollowersTable"."userId" = {});'.format(id)
     try:
         cur = conn.cursor()
         cur.execute(query)
         results = cur.fetchall()
         if len(results) != 0:
-            dict_result = [{'email': r[0], 'firstName': r[1],
+            dict_result = [{'id': r[0], 'firstName': r[1],
                         'lastName': r[2]} for r in results]
             return JSONResponse({"success": True, "message": "Successfully retrieved followed accounts", "data": dict_result}, status_code=201)
         else:
@@ -349,6 +349,21 @@ def show_accounts_following(id: int):
     except:
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
+@app.post("/accounts/followers")
+def show_accounts_following(id: int):
+    query = 'select "UsersTable"."id", "firstName", "lastName" from "UsersTable" inner join "FollowersTable" on "UsersTable"."id" = "FollowersTable"."userId" where ("FollowersTable"."followedById" = {});'.format(id)
+    try:
+        cur = conn.cursor()
+        cur.execute(query)
+        results = cur.fetchall()
+        if len(results) != 0:
+            dict_result = [{'id': r[0], 'firstName': r[1],
+                        'lastName': r[2]} for r in results]
+            return JSONResponse({"success": True, "message": "Successfully retrieved followed accounts", "data": dict_result}, status_code=201)
+        else:
+            return JSONResponse({"success": True, "message": "User has no followers"}, status_code=400)
+    except:
+        return JSONResponse({"Error": "Query was not processable"}, status_code=400)
 
 app.include_router(api_router)
 
