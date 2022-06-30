@@ -367,14 +367,14 @@ def show_accounts_following(id: int):
 
 @app.post("/questions")
 def post_question(question: questionToPost):
-    query = 'insert into "QuestionsTable"("title", "description", "userId") values({}, {}, {});'
+    query = 'insert into "QuestionsTable"("title", "description", "userId") values({}, {}, {});'.format(question.title, question.description, question.userId)
     try:
         cur = conn.cursor()
-        print(1)
-        cur.execute(query, (question.title, question.description, question.userId))
-        print(2)
+        print("1")
+        cur.execute(query)
+        print("2")
         conn.commit()
-        print(3)
+        print("3")
         return JSONResponse({"success": True, "message": "Question successfully posted"}, status_code=201)
     except: 
         return JSONResponse({"Error": "Query was not processable"}, status_code=400)
